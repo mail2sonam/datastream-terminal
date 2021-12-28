@@ -1,0 +1,84 @@
+{
+	"info": {
+		"_postman_id": "e9e6fe6b-d607-4c59-b5a1-a147bb83d0ea",
+		"name": "DataStream - Terminal",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Post Data to Stream",
+			"request": {
+				"auth": {
+					"type": "oauth2",
+					"oauth2": [
+						{
+							"key": "clientSecret",
+							"value": "**********",
+							"type": "string"
+						},
+						{
+							"key": "accessTokenUrl",
+							"value": "http://34.134.149.85:8080/auth/realms/phonebridge-cti/protocol/openid-connect/token",
+							"type": "string"
+						},
+						{
+							"key": "client_authentication",
+							"value": "body",
+							"type": "string"
+						},
+						{
+							"key": "scope",
+							"value": "openid",
+							"type": "string"
+						},
+						{
+							"key": "clientId",
+							"value": "phonebridge-cti-client",
+							"type": "string"
+						},
+						{
+							"key": "grant_type",
+							"value": "client_credentials",
+							"type": "string"
+						},
+						{
+							"key": "tokenName",
+							"value": "token",
+							"type": "string"
+						},
+						{
+							"key": "addTokenTo",
+							"value": "header",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"payLoadId\":\"newid3\",\r\n    \"source\":\"admin\",\r\n    \"destSubscriberId\":\"abcd\",\r\n    \"topicName\":\"topicname\",\r\n    \"accountId\":\"accid\",\r\n    \"message\":\"test2\",\r\n    \"msgPostedOn\":\"\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "104.154.188.48:8081/stream",
+					"host": [
+						"104",
+						"154",
+						"188",
+						"48"
+					],
+					"port": "8081",
+					"path": [
+						"stream"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
