@@ -1,0 +1,45 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: datastream-terminal
+  labels:
+    app: datastream-terminal
+spec:
+  ports:
+  - name: http
+    port: 8081
+    targetPort: 8081
+  selector:
+    app: datastream-terminal
+  type: LoadBalancer
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: datastream-terminal
+  namespace: default
+  labels:
+    app: datastream-terminal
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: datastream-terminal
+  template:
+    metadata:
+      labels:
+        app: datastream-terminal
+    spec:
+      containers:
+      - name: datastream-terminal
+        image: mail2sonam/datastream-terminal:latest
+        env:
+        - name: oauth.issuer.uri
+          value: "http://localhost:8080/auth/realms/phonebridge-cti"
+        - name: oauth.jwkset.uri
+          value: "http://$(KEYCLOAK_SERVICE_HOST):$(KEYCLOAK_SERVICE_PORT_HTTP)/auth/realms/phonebridge-cti/protocol/openid-connect/certs"
+        ports:
+        - name: http
+          containerPort: 8081
+        - name: https
+          containerPort: 8443
