@@ -1,0 +1,29 @@
+spring:
+  application:
+    name: datastream-terminal
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${oauth.issuer.uri}
+          jwk-set-uri: ${oauth.jwkset.uri}
+server:
+  port: 8081
+logging:
+  level:
+    org:
+      springframework:
+        security: TRACE
+
+#management:
+#  endpoint:
+#    metrics:
+#      enabled: true
+#  metrics:
+#    export:
+#      elastic:
+#        host=http://<elastic-host>:<elastic-port>:#commented as Kubernetes has support for discovery service
+#eureka:
+#  client:
+#    serviceUrl:
+#      defaultZone: http://localhost:8761/eureka/
