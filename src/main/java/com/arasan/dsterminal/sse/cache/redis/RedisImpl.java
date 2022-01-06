@@ -8,6 +8,7 @@ import org.springframework.data.redis.core.ReactiveRedisTemplate;
 import org.springframework.stereotype.Component;
 
 import java.time.Duration;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -45,6 +46,11 @@ public class RedisImpl implements ICache {
 
     @Override
     public Set<SSEEmitterWrapper> getIdle(Duration duration) {
+        return null;
+    }
+
+    @Override
+    public List<String> getAllConnectionStats() {
         return null;
     }
 }

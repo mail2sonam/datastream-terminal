@@ -60,4 +60,13 @@ public class InMemoryImpl implements ICache {
                 .filter(e -> e!=null && e.getLastMsgOn() < threshHoldMillis)
                 .collect(Collectors.toSet());
     }
+
+    public List<String> getAllConnectionStats(){
+        List<String> result=new ArrayList<>();
+        localSubscriberSSEMap.forEach(
+                (key,sseSet)-> {
+                    result.add(key + ":" + sseSet.toString());
+                });
+        return result;
+    }
 }

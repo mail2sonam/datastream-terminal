@@ -8,6 +8,10 @@ import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.util.List;
+
 @RestController
 @RequestMapping("/stream")
 public class SseController {
@@ -22,10 +26,16 @@ public class SseController {
 
     @GetMapping(path = "/{accountId}/{topicName}/{subscriberId}",produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     @CrossOrigin
-    public SseEmitter streamData(@PathVariable(value="accountId") String accountId,
+    public SseEmitter streamData(@RequestHeader(name = "Last-Event-ID", required = false) String lastId,
+                                 @RequestHeader(value = "User-Agent") String userAgent,
+                                 @PathVariable(value="accountId") String accountId,
                                  @PathVariable(value="topicName") String topicName,
-                                 @PathVariable(value="subscriberId") String subscriberId) {
-    	return sseService.provisionUserSSE(accountId,topicName,subscriberId);
+                                 @PathVariable(value="subscriberId") String subscriberId,
+                                 HttpServletRequest request,
+                                 HttpServletResponse response) {
+        String ipAddress = request.getRemoteAddr();
+        response.setHeader("Cache-Control", "no-store");
+        return sseService.provisionUserSSE(accountId,topicName,subscriberId,ipAddress,userAgent);
     }
 
     @PostMapping
@@ -41,6 +51,13 @@ public class SseController {
                                  @PathVariable(value="subscriberId") String subscriberId) {
         sseService.logOutUser(accountId,topicName,subscriberId);
     }
+
+
+    @GetMapping(path = "/getAllConnectionStats")
+    public List<String> getAllConnectionStats() {
+        return sseService.getAllConnectionStats();
+    }
+
 
 
 }

@@ -11,9 +11,13 @@ server:
   port: 8081
 logging:
   level:
-    org:
-      springframework:
-        security: TRACE
+    com:
+      arasan: DEBUG
+#logging:
+#  level:
+#    org:
+#      springframework:
+#        security: TRACE
 
 #management:
 #  endpoint:
