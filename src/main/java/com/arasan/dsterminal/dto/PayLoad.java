@@ -15,7 +15,6 @@ public class PayLoad {
 
     private String source;
 
-    private String accountId;
     private String topicName;
     private String destSubscriberId;
 
@@ -24,7 +23,17 @@ public class PayLoad {
     @JsonIgnore
     private LocalDateTime msgReceivedOn;
 
-    public String getRegId(){
-        return accountId+"::"+topicName+"::"+destSubscriberId;
+    public String getRegId(String tenantId){
+        return tenantId+":"+topicName+":"+destSubscriberId;
+    }
+
+    @Override
+    public String toString() {
+        return "PayLoad{" +
+                "payLoadId='" + payLoadId + '\'' +
+                ", msgPostedOn=" + msgPostedOn +
+                ", topicName='" + topicName + '\'' +
+                ", destSubscriberId='" + destSubscriberId + '\'' +
+                '}';
     }
 }

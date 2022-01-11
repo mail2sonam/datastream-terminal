@@ -32,17 +32,17 @@ public class SSETerminalServImpl implements ISSETerminalServ {
 	private ICache sseConnectionCache;
 
 	@Override
-	public SSEEmitterWrapper provisionUserSSE(String accountId, String topicName, String subscriberId
+	public SSEEmitterWrapper provisionUserSSE(String tenantId, String topicName, String subscriberId
 			,String requestedIpAddress,String userAgent) {
-		if(!StringUtils.hasLength(accountId)
+		if(!StringUtils.hasLength(tenantId)
 				|| !StringUtils.hasLength(topicName)
 				|| !StringUtils.hasLength(subscriberId))
 			{
 			log.info("Quitting because empty accountId={},topicName={},subscriberId={},ip={},useragent={}",
-					accountId,topicName,subscriberId,requestedIpAddress,userAgent);
+					tenantId,topicName,subscriberId,requestedIpAddress,userAgent);
 			return null;
 			}
-		String regId = getRegId(accountId,topicName,subscriberId);
+		String regId = getRegId(tenantId,topicName,subscriberId);
 		SSEEmitterWrapper sseEmitter = new SSEEmitterWrapper(Long.MAX_VALUE,regId,currentNodeHostWithPort
 				,requestedIpAddress,userAgent);
 		sseEmitter.onCompletion(() -> {
@@ -63,17 +63,16 @@ public class SSETerminalServImpl implements ISSETerminalServ {
 
 
 	@Override
-	public void sendMsg(PayLoad obj) {
+	public void sendMsg(String tenantId,PayLoad obj) {
 		if(obj==null
-				|| !StringUtils.hasLength(obj.getAccountId())
 				|| !StringUtils.hasLength(obj.getTopicName())
 				|| !StringUtils.hasLength(obj.getDestSubscriberId()))
 		{
 			log.info("Skipping payload due to payload being null or destination null:{}"
-					,(obj==null ?null:(obj.getAccountId())+"::"+obj.getTopicName()+"::"+obj.getDestSubscriberId()));
+					,(obj==null ?null:(obj.getTopicName()+"::"+obj.getDestSubscriberId())));
 			return;
 		}
-		String regId = obj.getRegId();
+		String regId = obj.getRegId(tenantId);
 		Set<SSEEmitterWrapper> regSet = sseConnectionCache.get(regId);
 		if(regSet==null || regSet.isEmpty()) {
 			log.info("Skipping Posting as no subscribers found for :{}",regId);

@@ -34,9 +34,9 @@ public class PerfTest {
     public String baseUrl = "http://localhost:8081/stream";
     public String topicName = "cti";
     public String accountId = "eupraxia";
-    public int noOfConsumer = 100;
-    public int notOfEventsPerConsumer = 60;
-    public int threadPoolSize = 100;
+    public int noOfConsumer = 3;
+    public int notOfEventsPerConsumer = 10;
+    public int threadPoolSize = 3;
     AtomicInteger subscriberInt;
     WebClient client = WebClient.create(baseUrl);
 
@@ -151,7 +151,7 @@ public class PerfTest {
     private boolean postServerSentEvents(String subscriberId,String oauthToken) throws InterruptedException {
         for(int i=0;i<notOfEventsPerConsumer;i++){
             String message=String.valueOf(i);
-            PayLoad pl = generateEvent(subscriberId,message);
+            PayLoad pl = generateEvent("phonebridge-cti",subscriberId,message);
             int retryCount=0;
             ResponseEntity<Void> result = null;
             while(retryCount<3 && result==null) {
@@ -175,9 +175,9 @@ public class PerfTest {
         return true;
     }
 
-    private PayLoad generateEvent(String subscriberId,String message){
+    private PayLoad generateEvent(String tenatId,String subscriberId,String message){
         PayLoad pl = new PayLoad();
-        pl.setAccountId(accountId);
+        //pl.setAccountId(accountId);
         pl.setTopicName(topicName);
         pl.setPayLoadId(message);
         pl.setSource("admin");

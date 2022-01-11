@@ -13,8 +13,6 @@ logging:
   level:
     com:
       arasan: DEBUG
-#logging:
-#  level:
 #    org:
 #      springframework:
 #        security: TRACE

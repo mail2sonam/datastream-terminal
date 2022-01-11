@@ -4,7 +4,11 @@ import com.arasan.dsterminal.dto.PayLoad;
 import com.arasan.dsterminal.sse.terminalmgmt.ISSETerminalServ;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.annotation.Secured;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
@@ -24,35 +28,41 @@ public class SseController {
         this.sseService=sseService;
     }
 
-    @GetMapping(path = "/{accountId}/{topicName}/{subscriberId}",produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    @Secured("ROLE_datastream-consumer")
+    @GetMapping(path = "/{tenantId}/{topicName}/{subscriberId}",produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     @CrossOrigin
     public SseEmitter streamData(@RequestHeader(name = "Last-Event-ID", required = false) String lastId,
                                  @RequestHeader(value = "User-Agent") String userAgent,
-                                 @PathVariable(value="accountId") String accountId,
+                                 @RequestHeader(value="X-TenantID",required = true) String tenantId,
                                  @PathVariable(value="topicName") String topicName,
                                  @PathVariable(value="subscriberId") String subscriberId,
                                  HttpServletRequest request,
                                  HttpServletResponse response) {
         String ipAddress = request.getRemoteAddr();
         response.setHeader("Cache-Control", "no-store");
-        return sseService.provisionUserSSE(accountId,topicName,subscriberId,ipAddress,userAgent);
+        return sseService.provisionUserSSE(tenantId,topicName,subscriberId,ipAddress,userAgent);
     }
 
     @PostMapping
     @CrossOrigin
-    public void postData(@RequestBody PayLoad data) {
-    	sseService.sendMsg(data);
+    @PreAuthorize("hasRole('datastream-producer')")
+    public ResponseEntity postData(@RequestHeader(value="X-TenantID",required = true) String tenantId,
+                                   @RequestBody PayLoad data) {
+    	sseService.sendMsg(tenantId,data);
+        return new ResponseEntity(HttpStatus.OK);
     }
 
-    @GetMapping(path = "/logout/{accountId}/{topicName}/{subscriberId}",produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    @GetMapping(path = "/logout/{topicName}/{subscriberId}",produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     @CrossOrigin
-    public void logout(@PathVariable(value="accountId") String accountId,
+    @Secured("datastream-consumer")
+    public void logout(@RequestHeader(value="X-TenantID") String tenantId,
                                  @PathVariable(value="topicName") String topicName,
                                  @PathVariable(value="subscriberId") String subscriberId) {
-        sseService.logOutUser(accountId,topicName,subscriberId);
+        sseService.logOutUser(tenantId,topicName,subscriberId);
     }
 
 
+    @Secured("datastream-admin")
     @GetMapping(path = "/getAllConnectionStats")
     public List<String> getAllConnectionStats() {
         return sseService.getAllConnectionStats();
