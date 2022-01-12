@@ -6,8 +6,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.http.HttpMethod;
-import org.springframework.web.reactive.function.client.WebClient;
 
 @SpringBootApplication
 public class DataStreamTerminalApplication implements CommandLineRunner {
@@ -23,6 +21,6 @@ public class DataStreamTerminalApplication implements CommandLineRunner {
 
 	@Override
 	public void run(String... args) throws Exception {
-		log.info("0.0.4-SNAPSHOT --> IssuerURI="+issuerUri+", JWKSetUri="+jwkSetUri);
+		log.info("0.0.5-SNAPSHOT --> IssuerURI="+issuerUri+", JWKSetUri="+jwkSetUri);
 	}
 }

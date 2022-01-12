@@ -1,5 +1,6 @@
 package com.arasan.dsterminal.dto;
 
+import com.arasan.dsterminal.sse.terminalmgmt.SSETerminalUtils;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
@@ -24,7 +25,7 @@ public class PayLoad {
     private LocalDateTime msgReceivedOn;
 
     public String getRegId(String tenantId){
-        return tenantId+":"+topicName+":"+destSubscriberId;
+        return SSETerminalUtils.getRegId(tenantId,topicName,destSubscriberId);
     }
 
     @Override

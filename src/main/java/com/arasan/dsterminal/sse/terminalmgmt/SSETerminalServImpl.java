@@ -12,6 +12,7 @@ import com.arasan.dsterminal.dto.PayLoad;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cloud.sleuth.Tracer;
 import org.springframework.core.env.Environment;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
@@ -31,6 +32,9 @@ public class SSETerminalServImpl implements ISSETerminalServ {
 
 	private ICache sseConnectionCache;
 
+	@Autowired
+	Tracer tracer;
+
 	@Override
 	public SSEEmitterWrapper provisionUserSSE(String tenantId, String topicName, String subscriberId
 			,String requestedIpAddress,String userAgent) {
@@ -42,7 +46,7 @@ public class SSETerminalServImpl implements ISSETerminalServ {
 					tenantId,topicName,subscriberId,requestedIpAddress,userAgent);
 			return null;
 			}
-		String regId = getRegId(tenantId,topicName,subscriberId);
+		String regId = SSETerminalUtils.getRegId(tenantId,topicName,subscriberId);
 		SSEEmitterWrapper sseEmitter = new SSEEmitterWrapper(Long.MAX_VALUE,regId,currentNodeHostWithPort
 				,requestedIpAddress,userAgent);
 		sseEmitter.onCompletion(() -> {
@@ -63,20 +67,21 @@ public class SSETerminalServImpl implements ISSETerminalServ {
 
 
 	@Override
-	public void sendMsg(String tenantId,PayLoad obj) {
+	public String sendMsg(String tenantId,PayLoad obj) {
 		if(obj==null
 				|| !StringUtils.hasLength(obj.getTopicName())
 				|| !StringUtils.hasLength(obj.getDestSubscriberId()))
 		{
 			log.info("Skipping payload due to payload being null or destination null:{}"
 					,(obj==null ?null:(obj.getTopicName()+"::"+obj.getDestSubscriberId())));
-			return;
+			throw new IllegalArgumentException("Payload or Destination Null");
 		}
+		String traceId = tracer.currentSpan().context().traceId();
 		String regId = obj.getRegId(tenantId);
 		Set<SSEEmitterWrapper> regSet = sseConnectionCache.get(regId);
 		if(regSet==null || regSet.isEmpty()) {
 			log.info("Skipping Posting as no subscribers found for :{}",regId);
-			return;
+			return traceId;
 		}
 		regSet.forEach(sseEmitter -> {
 			log.debug("Posting to subscriber {} msg {}",regId,obj);
@@ -87,7 +92,8 @@ public class SSETerminalServImpl implements ISSETerminalServ {
 						,sseEmitter.getRegHost(),regId,currentNodeHostWithPort);
 			}
 		});
-		log.debug("Posted {} messages to subscriber {}",regSet.size(),regId);
+		log.debug("Posted to {} connections for subscriber {}",regSet.size(),regId);
+		return traceId;
 	}
 	
 	
@@ -108,15 +114,11 @@ public class SSETerminalServImpl implements ISSETerminalServ {
 
 	@Override
 	public void logOutUser(String accountId, String topicName, String subscriberId) {
-		String regId = getRegId(accountId,topicName,subscriberId);
+		String regId = SSETerminalUtils.getRegId(accountId,topicName,subscriberId);
 		Optional.ofNullable(sseConnectionCache.get(regId))
 				.orElse(Collections.emptySet())
 				.forEach(sse -> sse.complete());
 		sseConnectionCache.remove(regId);
-	}
-
-	private String getRegId(String accountId,String topicName,String destSubscriberId){
-		return accountId+"::"+topicName+"::"+destSubscriberId;
 	}
 
 	ScheduledExecutorService scheduledExecutorService =
